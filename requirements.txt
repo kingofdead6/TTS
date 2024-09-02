@@ -1,3 +1,4 @@
 Flask
 pyttsx3
 pydub
+flask_cors
