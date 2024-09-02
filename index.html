@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text-to-Speech with Download</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+    <div class="input-container">
+        <textarea id="input" placeholder="Enter text here..."></textarea>
+        <button id="speakButton">Speak</button>
+        <button id="downloadButton" onclick="convertToSpeech()">Download as WAV</button>
+        <audio id="audioPlayer" controls style="display:none;"></audio>
+    </div>
+    <footer>
+        <div class="footer-bottom">
+            &copy; 2024 Softweb Elevation. All rights reserved.
+        </div>
+    </footer>
+    <script>
+        const speakButton = document.getElementById('speakButton');
+        const synth = window.speechSynthesis;
+        let utterance;
+        let lastSpokenText = "";
+
+        speakButton.addEventListener('click', () => {
+            const text = document.getElementById('input').value;
+            if (!text) return;
+
+            utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 1; // Normal speed
+            utterance.pitch = 1; // Normal pitch
+            utterance.volume = 1; // Full volume
+
+            synth.speak(utterance);
+            lastSpokenText = text;
+        });
+        function convertToSpeech() {
+            const text = document.getElementById('input').value;
+
+            // Create a form data object
+            const formData = new FormData();
+            formData.append('text', text);
+
+            // Send the request to the Flask server
+            fetch('http://127.0.0.1:5000/convert', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                // Create a URL for the audio file
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'output.wav';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            })
+            .catch(error => console.error('Error:', error));
+        }
+        
+    </script>
+</body>
+</html>
